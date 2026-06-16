@@ -597,6 +597,7 @@ static void CB2_InitBattleInternal(void)
             CreateNPCTrainerParty(&gParties[B_TRAINER_OPPONENT_A][0], TRAINER_BATTLE_PARAM.opponentA);
             if (gBattleTypeFlags & BATTLE_TYPE_TWO_OPPONENTS && !BATTLE_TWO_VS_ONE_OPPONENT)
                 CreateNPCTrainerParty(&gParties[B_TRAINER_OPPONENT_B][0], TRAINER_BATTLE_PARAM.opponentB);
+            InitTotemBattleSetup();
             SetWildMonHeldItem();
             CalculateEnemyPartyCount();
         }
@@ -3080,6 +3081,15 @@ static void BattleStartClearSetData(void)
 
     gBattleStruct->arenaLostPlayerMons = 0;
     gBattleStruct->arenaLostOpponentMons = 0;
+
+    // Initialize Totem battle fields
+    gBattleStruct->isTotemBattle = FALSE;
+    gBattleStruct->totemTurnCounter = 0;
+    gBattleStruct->totemAllyAlreadySummoned = FALSE;
+    for (i = 0; i < MAX_BATTLERS_COUNT; i++)
+    {
+        gBattleStruct->totemBattlerMonSpecies[i] = SPECIES_NONE;
+    }
 
     for (i = 0; i < ARRAY_COUNT(gSideTimers); i++)
     {

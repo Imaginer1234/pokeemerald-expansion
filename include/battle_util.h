@@ -420,5 +420,7 @@ bool32 BattlerJustSwitchedIn(enum BattlerId battler);
 bool32 IsBattlersFirstTurn(enum BattlerId battler);
 struct PartyState *GetBattlerPartyState(enum BattlerId battler);
 void SetValuesOnFaint(enum BattlerId battler);
+void InitTotemBattleSetup(void);
+bool32 TrySummonTotemAlly(void);
 
 #endif // GUARD_BATTLE_UTIL_H

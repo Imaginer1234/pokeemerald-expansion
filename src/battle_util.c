@@ -40,6 +40,7 @@
 #include "pokedex.h"
 #include "mail.h"
 #include "field_weather.h"
+#include "data/totem_battles.h"
 #include "constants/abilities.h"
 #include "constants/battle_anim.h"
 #include "constants/battle_move_effects.h"
@@ -3500,6 +3501,18 @@ u32 AbilityBattleEffects(enum AbilityEffect caseID, enum BattlerId battler, enum
             break;
         default:
             break;
+        }
+        // If no ability effect triggered, check for Totem boost
+        if (effect == 0)
+        {
+            const struct TotemData *totemData = GetTotemData(gBattleMons[battler].species);
+            if (totemData != NULL && gBattleStruct->isTotemBattle)
+            {
+                gEffectBattler = gBattlerAbility = battler;
+                SetStatChange(battler, totemData->statToBoost, totemData->boostStages);
+                BattleScriptCall(BattleScript_AbilityStatChange);
+                effect++;
+            }
         }
         break;
     case ABILITYEFFECT_SWITCH_IN_FORM_CHANGE:
@@ -11009,4 +11022,80 @@ void SetValuesOnFaint(enum BattlerId battler)
         gBattleResults.lastOpponentSpecies = GetMonData(GetBattlerMon(battler), MON_DATA_SPECIES);
         gSideTimers[B_SIDE_OPPONENT].retaliateTimer = 2;
     }
+}
+
+void InitTotemBattleSetup(void)
+{
+    u32 i;
+    enum Species species = SPECIES_NONE;
+    const struct TotemData *totemData = NULL;
+
+    if (!(gBattleTypeFlags & BATTLE_TYPE_TRAINER))
+        return;
+
+    if (gBattleTypeFlags & (BATTLE_TYPE_LINK | BATTLE_TYPE_MULTI | BATTLE_TYPE_TWO_OPPONENTS))
+        return;
+
+    for (i = 0; i < PARTY_SIZE; i++)
+    {
+        species = GetMonData(&gParties[B_TRAINER_OPPONENT_A][i], MON_DATA_SPECIES);
+        if (species == SPECIES_NONE || species == SPECIES_EGG)
+            continue;
+
+        totemData = GetTotemData(species);
+        if (totemData != NULL)
+            break;
+    }
+
+    if (totemData == NULL)
+        return;
+
+    gBattleStruct->isTotemBattle = TRUE;
+    gBattleStruct->totemBattlerMonSpecies[B_BATTLER_1] = species;
+
+    // Ally is summoned mid-battle; keep slot 1 empty until then.
+    ZeroMonData(&gParties[B_TRAINER_OPPONENT_A][1]);
+
+    if (!(gBattleTypeFlags & BATTLE_TYPE_DOUBLE))
+        gBattleTypeFlags |= BATTLE_TYPE_DOUBLE;
+}
+
+bool32 TrySummonTotemAlly(void)
+{
+    enum BattlerId totemBattler = B_BATTLER_1;
+    enum BattlerId allyBattler = B_BATTLER_3;
+    const struct TotemData *totemData;
+    bool32 shouldSummon = FALSE;
+
+    if (!gBattleStruct->isTotemBattle || gBattleStruct->totemAllyAlreadySummoned)
+        return FALSE;
+
+    if (!IsBattlerAlive(totemBattler) || gBattleMons[totemBattler].species == SPECIES_NONE)
+        return FALSE;
+
+    totemData = GetTotemData(gBattleMons[totemBattler].species);
+    if (totemData == NULL)
+        return FALSE;
+
+    if (totemData->turnThreshold > 0 && gBattleResults.battleTurnCounter >= totemData->turnThreshold)
+        shouldSummon = TRUE;
+
+    if (totemData->hpThreshold > 0 && gBattleMons[totemBattler].maxHP > 0
+     && (u32)gBattleMons[totemBattler].hp * 100 <= (u32)totemData->hpThreshold * gBattleMons[totemBattler].maxHP)
+        shouldSummon = TRUE;
+
+    if (!shouldSummon)
+        return FALSE;
+
+    CreateMonWithIVs(&gParties[B_TRAINER_OPPONENT_A][1], totemData->allySpecies, totemData->allyLevel, Random32(), OTID_STRUCT_RANDOM_NO_SHINY, USE_RANDOM_IVS);
+
+    gBattlerPartyIndexes[allyBattler] = 1;
+    gBattleStruct->monToSwitchIntoId[allyBattler] = 1;
+    gAbsentBattlerFlags &= ~(1u << allyBattler);
+    gBattleScripting.battler = allyBattler;
+    gBattlerAttacker = totemBattler;
+
+    BattleScriptCall(BattleScript_TotemAllySendOut);
+    gBattleStruct->totemAllyAlreadySummoned = TRUE;
+    return TRUE;
 }

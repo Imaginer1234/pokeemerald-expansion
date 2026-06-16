@@ -1539,6 +1539,16 @@ static bool32 HandleEndTurnDynamax(enum BattlerId battler)
     return effect;
 }
 
+static bool32 HandleEndTurnTotemAllySummon(enum BattlerId battler)
+{
+    gBattleStruct->eventState.endTurn++;
+
+    if (TrySummonTotemAlly())
+        return TRUE;
+
+    return FALSE;
+}
+
 static bool32 (*const sEndTurnEffectHandlers[])(enum BattlerId battler) =
 {
     [ENDTURN_ORDER] = HandleEndTurnOrder,
@@ -1594,6 +1604,7 @@ static bool32 (*const sEndTurnEffectHandlers[])(enum BattlerId battler) =
     [ENDTURN_ARENA_TURN_END] = HandleEndTurnArenaTurnEnd,
     [ENDTURN_FAINTED_MON_ACTIONS] = HandleEndTurnFaintedMonActions,
     [ENDTURN_DYNAMAX] = HandleEndTurnDynamax,
+    [ENDTURN_TOTEM_ALLY_SUMMON] = HandleEndTurnTotemAllySummon,
 };
 
 static bool32 HandleEndTurnEmergencyExit(enum BattlerId battler)

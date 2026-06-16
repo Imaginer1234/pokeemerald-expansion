@@ -5570,6 +5570,21 @@ BattleScript_TotemBoost::
 	waitmessage B_WAIT_TIME_LONG
     end3
 
+BattleScript_TotemAllySendOut::
+	playanimation BS_ATTACKER, B_ANIM_TOTEM_FLARE, NULL
+	printstring STRINGID_AURAFLAREDTOLIFE
+	waitmessage B_WAIT_TIME_LONG
+	getswitchedmondata BS_SCRIPTING
+	switchindataupdate BS_SCRIPTING
+	hpthresholds BS_SCRIPTING
+	flushtextbox
+	printstring STRINGID_SWITCHINMON
+	switchinanim BS_SCRIPTING, FALSE, FALSE
+	waitstate
+	switchineffects BS_SCRIPTING
+	switchinevents
+	end2
+
 BattleScript_AnnounceAirLockCloudNine::
 	call BattleScript_AbilityPopUp
 	printstring STRINGID_AIRLOCKACTIVATES

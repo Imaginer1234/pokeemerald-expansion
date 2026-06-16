@@ -731,6 +731,12 @@ struct BattleStruct
     u8 intimidateActivated:1;
     u8 allowPartingShot:1;
     u8 adrenalineOrbActivated:1; // prevents looping after an adrenaline stat changed
+
+    // Totem battle fields
+    bool8 isTotemBattle;
+    u16 totemBattlerMonSpecies[MAX_BATTLERS_COUNT];  // Track which battler is a Totem
+    u8 totemTurnCounter;                       // Turn count for ally summon trigger
+    bool8 totemAllyAlreadySummoned;            // Prevent re-summoning
 };
 
 struct AiBattleData
