@@ -39,11 +39,13 @@
 #include "constants/game_stat.h"
 #include "constants/item.h"
 #include "constants/items.h"
+#include "constants/items_xy.h"
 #include "constants/heal_locations.h"
 #include "constants/layouts.h"
 #include "constants/lilycove_lady.h"
 #include "constants/map_scripts.h"
 #include "constants/maps.h"
+#include "constants/maps_xy.h"
 #include "constants/mauville_old_man.h"
 #include "constants/metatile_labels.h"
 #include "constants/move_relearner.h"
@@ -62,6 +64,7 @@
 #include "constants/secret_bases.h"
 #include "constants/siirtc.h"
 #include "constants/songs.h"
+#include "constants/music_xy.h"
 #include "constants/sound.h"
 #include "constants/species.h"
 #include "constants/trade.h"
@@ -1737,3 +1740,9 @@ EventScript_PalletTown_PlayersHouse_2F_TurnOnPC::
 	.include "data/scripts/battle_frontier.inc"
 	.include "data/scripts/apricorn_tree.inc"
 	.include "data/scripts/wild_encounter.inc"
+
+	.include "data/maps/VanivilleTown/scripts.inc"
+
+	.include "data/maps/Route1/scripts.inc"
+
+	.include "data/maps/AquacordeTown/scripts.inc"
